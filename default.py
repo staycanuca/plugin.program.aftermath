@@ -27,7 +27,7 @@ try:    from sqlite3 import dbapi2 as database
 except: from pysqlite2 import dbapi2 as database
 from datetime import date, datetime, timedelta
 from urlparse import urljoin
-from resources.libs import extract, downloader, notify, debridit, traktit, loginit, skinSwitch, uploadLog, yt, speedtest, wizard as wiz
+from resources.libs import extract, downloader, notify, debridit, traktit, loginit, moduleit, skinSwitch, uploadLog, yt, speedtest, wizard as wiz
 
 ADDON_ID         = uservar.ADDON_ID
 ADDONTITLE       = uservar.ADDONTITLE
@@ -93,6 +93,7 @@ NOTEDISMISS      = wiz.getS('notedismiss')
 TRAKTSAVE        = wiz.getS('traktlastsave')
 REALSAVE         = wiz.getS('debridlastsave')
 LOGINSAVE        = wiz.getS('loginlastsave')
+MODULESAVE        = wiz.getS('modulelastsave')
 KEEPFAVS         = wiz.getS('keepfavourites')
 KEEPSOURCES      = wiz.getS('keepsources')
 KEEPPROFILES     = wiz.getS('keepprofiles')
@@ -103,6 +104,7 @@ KEEPWHITELIST    = wiz.getS('keepwhitelist')
 KEEPTRAKT        = wiz.getS('keeptrakt')
 KEEPREAL         = wiz.getS('keepdebrid')
 KEEPLOGIN        = wiz.getS('keeplogin')
+KEEPMODULE        = wiz.getS('keepmodule')
 DEVELOPER        = wiz.getS('developer')
 THIRDPARTY       = wiz.getS('enable3rd')
 THIRD1NAME       = wiz.getS('wizard1name')
@@ -1114,6 +1116,7 @@ def saveMenu():
 	trakt      = 'true' if KEEPTRAKT     == 'true' else 'false'
 	real       = 'true' if KEEPREAL      == 'true' else 'false'
 	login      = 'true' if KEEPLOGIN     == 'true' else 'false'
+	module      = 'true' if KEEPMODULE     == 'true' else 'false'
 	sources    = 'true' if KEEPSOURCES   == 'true' else 'false'
 	advanced   = 'true' if KEEPADVANCED  == 'true' else 'false'
 	profiles   = 'true' if KEEPPROFILES  == 'true' else 'false'
@@ -1125,12 +1128,14 @@ def saveMenu():
 	addDir ('Keep Trakt Data',               'trakt',                icon=ICONTRAKT, themeit=THEME1)
 	addDir ('Keep Real Debrid',              'realdebrid',           icon=ICONREAL,  themeit=THEME1)
 	addDir ('Keep API Keys',               'login',                icon=ICONLOGIN, themeit=THEME1)
+	addDir ('Keep Modules',               'modules',                icon=ICONLOGIN, themeit=THEME1)
 	addFile('Import Save Data',              'managedata', 'import', icon=ICONSAVE,  themeit=THEME1)
 	addFile('Export Save Data',              'managedata', 'export', icon=ICONSAVE,  themeit=THEME1)
 	addFile('- Click to toggle settings -', '', themeit=THEME3)
 	addFile('Save Trakt: %s' % trakt.replace('true',on).replace('false',off)                       ,'togglesetting', 'keeptrakt',      icon=ICONTRAKT, themeit=THEME1)
 	addFile('Save Real Debrid: %s' % real.replace('true',on).replace('false',off)                  ,'togglesetting', 'keepdebrid',     icon=ICONREAL,  themeit=THEME1)
 	addFile('Save API Keys: %s' % login.replace('true',on).replace('false',off)                  ,'togglesetting', 'keeplogin',      icon=ICONLOGIN, themeit=THEME1)
+	addFile('Save Module Data: %s' % module.replace('true',on).replace('false',off)                  ,'togglesetting', 'keepmodule',      icon=ICONLOGIN, themeit=THEME1)
 	addFile('Keep \'Sources.xml\': %s' % sources.replace('true',on).replace('false',off)           ,'togglesetting', 'keepsources',    icon=ICONSAVE,  themeit=THEME1)
 	addFile('Keep \'Profiles.xml\': %s' % profiles.replace('true',on).replace('false',off)         ,'togglesetting', 'keepprofiles',   icon=ICONSAVE,  themeit=THEME1)
 	addFile('Keep \'Advancedsettings.xml\': %s' % advanced.replace('true',on).replace('false',off) ,'togglesetting', 'keepadvanced',   icon=ICONSAVE,  themeit=THEME1)
@@ -1258,6 +1263,44 @@ def loginMenu():
 	addFile('Import API Keys',            'importlogin',  'all', icon=ICONLOGIN,  themeit=THEME3)
 	addFile('Clear All Addon API Keys',         'addonlogin',   'all', icon=ICONLOGIN,  themeit=THEME3)
 	addFile('Clear All Saved API Keys',   'clearlogin',   'all', icon=ICONLOGIN,  themeit=THEME3)
+	setView('files', 'viewType')
+
+def modulesMenu():
+	module = '[COLOR springgreen]ON[/COLOR]' if KEEPMODULE == 'true' else '[COLOR red]OFF[/COLOR]'
+	last = str(MODULESAVE) if not MODULESAVE == '' else 'Module data hasnt been saved yet.'
+	addFile('[I]Several of these addons are PAID services.[/I]', '', icon=ICONLOGIN, themeit=THEME3)
+	addFile('Save Module Data: %s' % module, 'togglesetting', 'keepmodules', icon=ICONLOGIN, themeit=THEME3)
+	if KEEPMODULE == 'true': addFile('Last Save: %s' % str(last), '', icon=ICONLOGIN, themeit=THEME3)
+	if HIDESPACERS == 'No': addFile(wiz.sep(), '', icon=ICONLOGIN, themeit=THEME3)
+
+	for module in moduleit.ORDER:
+		name   = moduleIt.moduleID(module)['name']
+		path   = moduleIt.moduleID(module)['path']
+		saved  = moduleIt.moduleID(module)['saved']
+		file   = moduleIt.moduleID(module)['file']
+		user   = wiz.getS(saved)
+		auser  = moduleit.moduleUser(module)
+		icon   = moduleIt.moduleID(module)['icon']   if os.path.exists(path) else ICONLOGIN
+		fanart = moduleIt.moduleID(module)['fanart'] if os.path.exists(path) else FANART
+		menu = createMenu('saveaddon', 'Login', login)
+		menu2 = createMenu('save', 'Login', login)
+		menu.append((THEME2 % '%s Settings' % name,              'RunPlugin(plugin://%s/?mode=opensettings&name=%s&url=login)' %   (ADDON_ID, login)))
+
+		addFile('[+]-> %s' % name,     '', icon=icon, fanart=fanart, themeit=THEME3)
+		if not os.path.exists(path): addFile('[COLOR red]Addon Data: Not Installed[/COLOR]', '', icon=icon, fanart=fanart, menu=menu)
+		elif not auser:              addFile('[COLOR red]Addon Data: Not Registered[/COLOR]','authmodule', module, icon=icon, fanart=fanart, menu=menu)
+		else:                        addFile('[COLOR springgreen]Addon Data: %s[/COLOR]' % auser,'authmodule', module, icon=icon, fanart=fanart, menu=menu)
+		if user == "":
+			if os.path.exists(file): addFile('[COLOR red]Saved Data: Save File Found(Import Data)[/COLOR]','importmodule', module, icon=icon, fanart=fanart, menu=menu2)
+			else :                   addFile('[COLOR red]Saved Data: Not Saved[/COLOR]','savemodule', module, icon=icon, fanart=fanart, menu=menu2)
+		else:                        addFile('[COLOR springgreen]Saved Data: %s[/COLOR]' % user, '', icon=icon, fanart=fanart, menu=menu2)
+
+	if HIDESPACERS == 'No': addFile(wiz.sep(), '', themeit=THEME3)
+	addFile('Save All Module Data',          'savemodule',    'all', icon=ICONLOGIN,  themeit=THEME3)
+	addFile('Recover All Saved Module Data', 'restoremodule', 'all', icon=ICONLOGIN,  themeit=THEME3)
+	addFile('Import Module Data',            'importmodule',  'all', icon=ICONLOGIN,  themeit=THEME3)
+	addFile('Clear All Module Data',         'addonmodule',   'all', icon=ICONLOGIN,  themeit=THEME3)
+	addFile('Clear All Saved Module Data',   'clearmodule',   'all', icon=ICONLOGIN,  themeit=THEME3)
 	setView('files', 'viewType')
 
 def fixUpdate():
@@ -2665,6 +2708,15 @@ elif mode=='clearlogin'     : loginit.clearSaved(name)
 elif mode=='authlogin'      : loginit.activateLogin(name); wiz.refresh()
 elif mode=='updatelogin'    : loginit.autoUpdate('all')
 elif mode=='importlogin'    : loginit.importlist(name); wiz.refresh()
+
+elif mode=='modules'         : modulesMenu()
+elif mode=='savemodule'      : moduleit.moduleIt('update',      name)
+elif mode=='restoremodule'   : moduleit.moduleIt('restore',     name)
+elif mode=='addonmodule'     : moduleit.moduleIt('clearaddon',  name)
+elif mode=='clearmodule'     : moduleit.clearSaved(name)
+elif mode=='authmodule'      : moduleit.activateModule(name); wiz.refresh()
+elif mode=='updatemodule'    : moduleit.autoUpdate('all')
+elif mode=='importmodule'    : moduleit.importlist(name); wiz.refresh()
 
 elif mode=='contact'        : notify.contact(CONTACT)
 elif mode=='settings'       : wiz.openS(name); wiz.refresh()
