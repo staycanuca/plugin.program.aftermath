@@ -27,7 +27,7 @@ try:    from sqlite3 import dbapi2 as database
 except: from pysqlite2 import dbapi2 as database
 from datetime import date, datetime, timedelta
 from resources.libs import wizard as wiz
-from resources.libs.modules import * as modules
+import resources.libs.modules as modules
 
 ADDON_ID       = uservar.ADDON_ID
 ADDONTITLE     = uservar.ADDONTITLE
@@ -49,27 +49,30 @@ KEEPMODULE      = wiz.getS('keepmodule')
 MODULESAVE      = wiz.getS('modulelastsave')
 COLOR1         = uservar.COLOR1
 COLOR2         = uservar.COLOR2
-ORDER          = moduleOrder()
 
 def moduleOrder():
 	array = []
-	for module in modules:
-		array.append(module.MODULEID)
+	for module in modules.__all__:
+		array.append(module.MODULEID.saved)
+
+	xbmc.log(array,level=xbmc.LOGNOTICE)
 	return array
+
+ORDER = moduleOrder()
 
 def moduleUser(who):
     user=None
-	if moduleId(who):
-		if os.path.exists(moduleId(who))['path']):
-			try:
-				add = wiz.addonId(moduleId(who))['plugin'])
-				user = add.getSetting(moduleId(who)['default'])
-			except:
-				return None
-	return user
+    if moduleId(who):
+        if os.path.exists(moduleId(who)['path']):
+            try:
+                add = wiz.addonId(moduleId(who)['plugin'])
+                user = add.getSetting(moduleId(who)['default'])
+            except:
+                return None
+    return user
 
 def moduleId(module):
-	MODULEID = modules[ORDER.index(module)]]
+	MODULEID = modules[ORDER.index(module)]
 	return MODULEID
 
 def moduleIt(do, who):
@@ -85,7 +88,7 @@ def moduleIt(do, who):
 					if user == '' and do == 'update': continue
 					updateModule(do, log)
 				except: pass
-			else: wiz.log('[Module Data] %s(%s) is not installed' % moduleId(log)['name'], moduleId(log)['plugin']), xbmc.LOGERROR)
+			else: wiz.log('[Module Data] %s(%s) is not installed' % moduleId(log)['name'], moduleId(log)['plugin'], xbmc.LOGERROR)
 		wiz.setS('modulelastsave', str(THREEDAYS))
 	else:
 		if moduleId(who):
@@ -144,7 +147,7 @@ def updateModule(do, who):
 			except Exception, e:
 				wiz.log("[Module Data] Unable to Restore %s (%s)" % (who, str(e)), xbmc.LOGERROR)
 		#else: wiz.LogNotify(name,'Trakt Data: [COLOR red]Not Found![/COLOR]', 2000, icon)
-	elif do == 'clearaddon':
+	elif do == 'clearmodule':
 		wiz.log('%s SETTINGS: %s' % (name, settings), xbmc.LOGDEBUG)
 		if os.path.exists(settings):
 			try:
