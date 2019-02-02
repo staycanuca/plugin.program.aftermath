@@ -48,7 +48,7 @@ KEEPTRAKT      = wiz.getS('keepdebrid')
 REALSAVE       = wiz.getS('debridlastsave')
 COLOR1         = uservar.COLOR1
 COLOR2         = uservar.COLOR2
-ORDER          = ['gaia', 'gaiapm', 'url', 'url2', 'url3', 'url4']
+ORDER          = ['gaia', 'gaiapm', 'serenrd', 'serenpm', 'rurlrd', 'rurlpm', 'urlrd', 'urlpm']
 
 DEBRIDID = {
 	'gaia': {
@@ -75,7 +75,31 @@ DEBRIDID = {
 		'default'  : 'accounts.debrid.premiumize.user',
 		'data'     : [ 'accounts.debrid.premiumize.enabled', 'accounts.debrid.premiumize.user', 'accounts.debrid.premiumize.pin'],
 		'activate' : 'RunPlugin(plugin://plugin.video.gaia/?action=premiumizeSettings)'},
-	'url': {
+	'serenrd': {
+		'name'     : 'Seren RD',
+		'plugin'   : 'plugin.video.seren',
+		'saved'    : 'serenrd',
+		'path'     : os.path.join(ADDONS, 'plugin.video.seren'),
+		'icon'     : os.path.join(ADDONS, 'plugin.video.seren', 'temp-icon.png'),
+		'fanart'   : os.path.join(ADDONS, 'plugin.video.seren', 'temp-fanart.png'),
+		'file'     : os.path.join(REALFOLD, 'seren_rd'),
+		'settings' : os.path.join(ADDOND, 'plugin.video.seren', 'settings.xml'),
+		'default'  : 'rd.username',
+		'data'     : [ 'rd.auth', 'rd.client_id', 'rd.expiry', 'rd.refresh', 'rd.secret', 'rd.username', 'realdebrid.enabled'],
+		'activate' : 'RunPlugin(plugin://plugin.video.seren/?action=authRealDebrid)'},
+	'serenpm': {
+		'name'     : 'Seren PM',
+		'plugin'   : 'plugin.video.seren',
+		'saved'    : 'serenpm',
+		'path'     : os.path.join(ADDONS, 'plugin.video.seren'),
+		'icon'     : os.path.join(ADDONS, 'plugin.video.seren', 'temp-icon.png'),
+		'fanart'   : os.path.join(ADDONS, 'plugin.video.seren', 'temp-fanart.png'),
+		'file'     : os.path.join(REALFOLD, 'seren_pm'),
+		'settings' : os.path.join(ADDOND, 'plugin.video.seren', 'settings.xml'),
+		'default'  : 'premiumize.pin',
+		'data'     : ['premiumize.enabled', 'premiumize.pin'],
+		'activate' : 'RunPlugin(plugin.video.seren/?action=openSettings)'},
+	'urlrd': {
 		'name'     : 'URLResolver RD',
 		'plugin'   : 'script.module.urlresolver',
 		'saved'    : 'urlrd',
@@ -85,9 +109,9 @@ DEBRIDID = {
 		'file'     : os.path.join(REALFOLD, 'url_debrid'),
 		'settings' : os.path.join(ADDOND, 'script.module.urlresolver', 'settings.xml'),
 		'default'  : 'RealDebridResolver_client_id',
-		'data'     : ['RealDebridResolver_autopick', 'RealDebridResolver_client_id', 'RealDebridResolver_client_secret', 'RealDebridResolver_enabled', 'RealDebridResolver_login', 'RealDebridResolver_priority', 'RealDebridResolver_refresh', 'RealDebridResolver_token'],
+		'data'     : ['RealDebridResolver_autopick', 'RealDebridResolver_client_id', 'RealDebridResolver_client_secret', 'RealDebridResolver_enabled', 'RealDebridResolver_login', 'RealDebridResolver_priority', 'RealDebridResolver_refresh', 'RealDebridResolver_token', 'RealDebridResolver_torrents'],
 		'activate' : 'RunPlugin(plugin://script.module.urlresolver/?mode=auth_rd)'},
-	'url2': {
+	'rurlrd': {
 		'name'     : 'ResolveURL RD',
 		'plugin'   : 'script.module.resolveurl',
 		'saved'    : 'rurlrd',
@@ -97,9 +121,9 @@ DEBRIDID = {
 		'file'     : os.path.join(REALFOLD, 'resurl_debrid'),
 		'settings' : os.path.join(ADDOND, 'script.module.resolveurl', 'settings.xml'),
 		'default'  : 'RealDebridResolver_client_id',
-		'data'     : ['RealDebridResolver_autopick', 'RealDebridResolver_client_id', 'RealDebridResolver_client_secret', 'RealDebridResolver_enabled', 'RealDebridResolver_login', 'RealDebridResolver_priority', 'RealDebridResolver_refresh', 'RealDebridResolver_token'],
+		'data'     : ['RealDebridResolver_autopick', 'RealDebridResolver_client_id', 'RealDebridResolver_client_secret', 'RealDebridResolver_enabled', 'RealDebridResolver_login', 'RealDebridResolver_priority', 'RealDebridResolver_refresh', 'RealDebridResolver_token', 'RealDebridResolver_torrents', 'RealDebridResolver_cached_only'],
 		'activate' : 'RunPlugin(plugin://script.module.resolveurl/?mode=auth_rd)'},
-	'url3': {
+	'urlpm': {
 		'name'     : 'URLResolver PM',
 		'plugin'   : 'script.module.urlresolver',
 		'saved'    : 'urlpm',
@@ -108,10 +132,10 @@ DEBRIDID = {
 		'fanart'   : os.path.join(ADDONS, 'script.module.urlresolver', 'fanart.jpg'),
 		'file'     : os.path.join(REALFOLD, 'pmurl_debrid'),
 		'settings' : os.path.join(ADDOND, 'script.module.urlresolver', 'settings.xml'),
-		'default'  : 'PremiumizeMeResolver_username',
-		'data'     : ['PremiumizeMeResolver_enabled', 'PremiumizeMeResolver_login', 'PremiumizeMeResolver_password', 'PremiumizeMeResolver_priority', 'PremiumizeMeResolver_use_https', 'PremiumizeMeResolver_username'],
+		'default'  : 'PremiumizeMeResolver_password',
+		'data'     : ['PremiumizeMeResolver_enabled', 'PremiumizeMeResolver_login', 'PremiumizeMeResolver_password', 'PremiumizeMeResolver_priority', 'PremiumizeMeResolver_torrents'],
 		'activate' : ''},
-	'url4': {
+	'rurlpm': {
 		'name'     : 'ResolveURL PM',
 		'plugin'   : 'script.module.resolveurl',
 		'saved'    : 'rurlpm',
@@ -120,8 +144,8 @@ DEBRIDID = {
 		'fanart'   : os.path.join(ADDONS, 'script.module.resolveurl', 'fanart.jpg'),
 		'file'     : os.path.join(REALFOLD, 'pmrurl_debrid'),
 		'settings' : os.path.join(ADDOND, 'script.module.resolveurl', 'settings.xml'),
-		'default'  : 'PremiumizeMeResolver_username',
-		'data'     : ['PremiumizeMeResolver_enabled', 'PremiumizeMeResolver_login', 'PremiumizeMeResolver_password', 'PremiumizeMeResolver_priority', 'PremiumizeMeResolver_use_https', 'PremiumizeMeResolver_username'],
+		'default'  : 'PremiumizeMeResolver_token',
+		'data'     : ['PremiumizeMeResolver_enabled', 'PremiumizeMeResolver_priority', 'PremiumizeMeResolver_token', 'PremiumizeMeResolver_torrents', 'PremiumizeMeResolver_cached_only'],
 		'activate' : ''}
 }
 
@@ -149,13 +173,13 @@ def debridIt(do, who):
 					if user == '' and do == 'update': continue
 					updateDebrid(do, log)
 				except: pass
-			else: wiz.log('[Real Debrid Info] %s(%s) is not installed' % (DEBRIDID[log]['name'],DEBRIDID[log]['plugin']), xbmc.LOGERROR)
+			else: wiz.log('[Debrid Info] %s(%s) is not installed' % (DEBRIDID[log]['name'],DEBRIDID[log]['plugin']), xbmc.LOGERROR)
 		wiz.setS('debridlastsave', str(THREEDAYS))
 	else:
 		if DEBRIDID[who]:
 			if os.path.exists(DEBRIDID[who]['path']):
 				updateDebrid(do, who)
-		else: wiz.log('[Real Debrid Info] Invalid Entry: %s' % who, xbmc.LOGERROR)
+		else: wiz.log('[Debrid Info] Invalid Entry: %s' % who, xbmc.LOGERROR)
 
 def clearSaved(who, over=False):
 	if who == 'all':
@@ -165,7 +189,7 @@ def clearSaved(who, over=False):
 		file = DEBRIDID[who]['file']
 		if os.path.exists(file):
 			os.remove(file)
-			wiz.LogNotify('[COLOR %s]%s[/COLOR]' % (COLOR1, DEBRIDID[who]['name']),'[COLOR %s]Real Debrid Info: Removed![/COLOR]' % COLOR2, 2000, DEBRIDID[who]['icon'])
+			wiz.LogNotify('[COLOR %s]%s[/COLOR]' % (COLOR1, DEBRIDID[who]['name']),'[COLOR %s]Debrid Info: Removed![/COLOR]' % COLOR2, 2000, DEBRIDID[who]['icon'])
 		wiz.setS(DEBRIDID[who]['saved'], '')
 	if over == False: wiz.refresh()
 
@@ -190,10 +214,10 @@ def updateDebrid(do, who):
 					f.close()
 				user = addonid.getSetting(default)
 				wiz.setS(saved, user)
-				wiz.LogNotify("[COLOR %s]%s[/COLOR]" % (COLOR1, name), '[COLOR %s]Real Debrid Info: Saved![/COLOR]' % COLOR2, 2000, icon)
+				wiz.LogNotify("[COLOR %s]%s[/COLOR]" % (COLOR1, name), '[COLOR %s]Debrid Info: Saved![/COLOR]' % COLOR2, 2000, icon)
 			except Exception, e:
-				wiz.log("[Real Debrid Info] Unable to Update %s (%s)" % (who, str(e)), xbmc.LOGERROR)
-		else: wiz.LogNotify("[COLOR %s]%s[/COLOR]" % (COLOR1, name), '[COLOR %s]Real Debrid Info: Not Registered![/COLOR]' % COLOR2, 2000, icon)
+				wiz.log("[Debrid Info] Unable to Update %s (%s)" % (who, str(e)), xbmc.LOGERROR)
+		else: wiz.LogNotify("[COLOR %s]%s[/COLOR]" % (COLOR1, name), '[COLOR %s]Debrid Info: Not Registered![/COLOR]' % COLOR2, 2000, icon)
 	elif do == 'restore':
 		if os.path.exists(file):
 			f = open(file,mode='r'); g = f.read().replace('\n','').replace('\r','').replace('\t',''); f.close();
@@ -204,9 +228,9 @@ def updateDebrid(do, who):
 						addonid.setSetting(debrid, value)
 				user = addonid.getSetting(default)
 				wiz.setS(saved, user)
-				wiz.LogNotify("[COLOR %s]%s[/COLOR]" % (COLOR1, name), '[COLOR %s]Real Debrid Info: Restored![/COLOR]' % COLOR2, 2000, icon)
+				wiz.LogNotify("[COLOR %s]%s[/COLOR]" % (COLOR1, name), '[COLOR %s]Debrid Info: Restored![/COLOR]' % COLOR2, 2000, icon)
 			except Exception, e:
-				wiz.log("[Real Debrid Info] Unable to Restore %s (%s)" % (who, str(e)), xbmc.LOGERROR)
+				wiz.log("[Debrid Info] Unable to Restore %s (%s)" % (who, str(e)), xbmc.LOGERROR)
 		#else: wiz.LogNotify(name,'Real Debrid Info: [COLOR red]Not Found![/COLOR]', 2000, icon)
 	elif do == 'clearaddon':
 		wiz.log('%s SETTINGS: %s' % (name, settings), xbmc.LOGDEBUG)
@@ -223,7 +247,7 @@ def updateDebrid(do, who):
 				f.close()
 				wiz.LogNotify("[COLOR %s]%s[/COLOR]" % (COLOR1, name),'[COLOR %s]Addon Data: Cleared![/COLOR]' % COLOR2, 2000, icon)
 			except Exception, e:
-				wiz.log("[Trakt Info] Unable to Clear Addon %s (%s)" % (who, str(e)), xbmc.LOGERROR)
+				wiz.log("[Debrid Info] Unable to Clear Addon %s (%s)" % (who, str(e)), xbmc.LOGERROR)
 	wiz.refresh()
 
 def autoUpdate(who):
@@ -239,7 +263,7 @@ def autoUpdate(who):
 			if u == None or u == '': return
 			elif su == '': debridIt('update', who)
 			elif not u == su:
-				if DIALOG.yesno("[COLOR %s]%s[/COLOR]" % (COLOR1, ADDONTITLE), "[COLOR %s]Would you like to save the [COLOR %s]Real Debrid[/COLOR] Info for [COLOR %s]%s[/COLOR]?" % (COLOR2, COLOR1, COLOR1, n), "Addon: [COLOR springgreen][B]%s[/B][/COLOR]" % u, "Saved:[/COLOR] [COLOR red][B]%s[/B][/COLOR]" % su if not su == '' else 'Saved:[/COLOR] [COLOR red][B]None[/B][/COLOR]', yeslabel="[B][COLOR %s]Save Debrid[/COLOR][/B]" % COLOR2, nolabel="[B][COLOR %s]No, Cancel[/COLOR][/B]" % COLOR1):
+				if DIALOG.yesno("[COLOR %s]%s[/COLOR]" % (COLOR1, ADDONTITLE), "[COLOR %s]Would you like to save the [COLOR %s]Debrid Info[/COLOR] for [COLOR %s]%s[/COLOR]?" % (COLOR2, COLOR1, COLOR1, n), "Addon: [COLOR springgreen][B]%s[/B][/COLOR]" % u, "Saved:[/COLOR] [COLOR red][B]%s[/B][/COLOR]" % su if not su == '' else 'Saved:[/COLOR] [COLOR red][B]None[/B][/COLOR]', yeslabel="[B][COLOR %s]Save Debrid[/COLOR][/B]" % COLOR2, nolabel="[B][COLOR %s]No, Cancel[/COLOR][/B]" % COLOR1):
 					debridIt('update', who)
 			else: debridIt('update', who)
 
@@ -258,7 +282,7 @@ def importlist(who):
 			m  = re.compile('<debrid><id>%s</id><value>(.+?)</value></debrid>' % d).findall(g)
 			if len(m) > 0:
 				if not m[0] == su:
-					if DIALOG.yesno("[COLOR %s]%s[/COLOR]" % (COLOR1, ADDONTITLE), "[COLOR %s]Would you like to import the [COLOR %s]Real Debrid[/COLOR] Info for [COLOR %s]%s[/COLOR]?" % (COLOR2, COLOR1, COLOR1, n), "File: [COLOR springgreen][B]%s[/B][/COLOR]" % m[0], "Saved:[/COLOR] [COLOR red][B]%s[/B][/COLOR]" % su if not su == '' else 'Saved:[/COLOR] [COLOR red][B]None[/B][/COLOR]', yeslabel="[B][COLOR %s]Import Debrid[/COLOR][/B]" % COLOR2, nolabel="[B][COLOR %s]No, Cancel[/COLOR][/B]" % COLOR1):
+					if DIALOG.yesno("[COLOR %s]%s[/COLOR]" % (COLOR1, ADDONTITLE), "[COLOR %s]Would you like to import the [COLOR %s]Debrid Info[/COLOR] for [COLOR %s]%s[/COLOR]?" % (COLOR2, COLOR1, COLOR1, n), "File: [COLOR springgreen][B]%s[/B][/COLOR]" % m[0], "Saved:[/COLOR] [COLOR red][B]%s[/B][/COLOR]" % su if not su == '' else 'Saved:[/COLOR] [COLOR red][B]None[/B][/COLOR]', yeslabel="[B][COLOR %s]Import Debrid[/COLOR][/B]" % COLOR2, nolabel="[B][COLOR %s]No, Cancel[/COLOR][/B]" % COLOR1):
 						wiz.setS(sa, m[0])
 						wiz.log('[Import Data] %s: %s' % (who, str(m)), xbmc.LOGNOTICE)
 					else: wiz.log('[Import Data] Declined Import(%s): %s' % (who, str(m)), xbmc.LOGNOTICE)

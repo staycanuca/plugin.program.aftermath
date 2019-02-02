@@ -1,16 +1,35 @@
 # plugin.program.aftermath
 Aftermath Wizard
 
-Aftermath Wizard was created to help the Kodi community out and help get rid of the broken personal wizards that are floating around. As this is a work in progress, I would highly recommend the use of a repository, but if you prefer not to, there is a built-in auto-updater. The current version of the wizard is v0.2.5.
+Aftermath Wizard was created to help the Kodi community out and help get rid of the broken personal wizards that are floating around. As this is a work in progress, I would highly recommend the use of a repository, but if you prefer not to, there is a built-in auto-updater.
 
-To get started, you can clone or fork this repository, and begin making your own changes.
+For more information on how to edit/customize this wizard for your own usage, please read [the wiki](https://github.com/drinfernoo/plugin.program.aftermath/wiki).
 
-There are a few things that need to be edited to fully customize your wizard:
+Currently, this version of the wizard supports:
 
-* [addon.xml](https://github.com/drinfernoo/plugin.program.aftermath/wiki/addon.xml)
-* icon.png - the icon to be shown in Kodi. This must be a 512x512 pixel '.png' file.
-* fanart.jpg - the fanart to be shown in Kodi. This must be a 1920x1080 (or similar ratio) pixel '.jpg' file.
-* [uservar.py](https://github.com/drinfernoo/plugin.program.aftermath/wiki/uservar.py)
-* [Wizard Text Files](https://github.com/drinfernoo/plugin.program.aftermath/wiki/Wizard-Text-Files)
+|  Add-on                            | Cache Clearing | Trakt | Real-Debrid | Premiumize | Trakt API | TMDb | TVDB | OMDb | IMDb | Fanart.tv | Location | Username/Password/Login |
+|------------------------------------|:--------------:|:-----:|:-----------:|:----------:|:---------:|:----:|:----:|:----:|:----:|:---------:|:--------:|:-----------------------:|
+| 13Clowns                           | [x]            | [x]   |             |            |           | [x]  |      |      | [x]  | [x]       |          |                         |
+| AutoCompletion                     | [x]            |       |             |            |           |      |      |      |      |           |          |                         |
+| Exodus Redux                       | [x]            | [x]   |             |            |           | [x]  |      |      | [x]  | [x]       |          |                         |
+| ExtendedInfo Script                | [x]            |       |             |            |           | [x]  |      |      |      |           |          |                         |
+| Gaia                               | [x]            | [x]   | [x]         | [x]        |           | [x]  |      |      | [x]  | [x]       |          |                         |
+| IAGL/IARL                          | [x]            |       |             |            |           |      |      |      |      |           |          | [x]                     |
+| Magicality                         | [x]            | [x]   |             |            |           | [x]  |      |      | [x]  | [x]       |          |                         |
+| Netflix                            |                |       |             |            |           |      |      |      |      |           |          | [x]                     |
+| OpenInfo                           | [x]            |       |             |            |           | [x]  |      |      |      |           |          |                         |
+| OpenMeta                           | [x]            | [x]   |             |            | [x]       | [x]  | [x]  |      |      |           |          |                         |
+| OpenSubtitles.org                  |                |       |             |            |           |      |      |      |      |           |          | [x]                     |
+| OpenSubtitles.org by OpenSubtitles |                |       |             |            |           |      |      |      |      |           |          | [x]                     |
+| Orion                              |                |       |             |            |           |      |      |      |      |           |          | [x]                     |
+| Placenta                           | [x]            | [x]   |             |            |           | [x]  |      |      | [x]  | [x]       |          |                         |
+| metahandler                        |                |       |             |            |           | [x]  | [x]  | [x]  |      |           |          |                         |
+| ResolveURL                         |                |       | [x]         | [x]        |           |      |      |      |      |           |          |                         |
+| script.module.metadatautils        | [x]            |       |             |            |           | [x]  |      | [x]  |      | [x]       |          |                         |
+| Seren                              | [x]            | [x]   | [x]         | [x]        | [x]       | [x]  | [x]  |      |      |           |          |                         |
+| Trakt                              |                | [x]   |             |            |           |      |      |      |      |           |          |                         |
+| URLResolver                        |                |       | [x]         | [x]        |           |      |      |      |      |           |          |                         |
+| Yahoo! Weather                     |                |       |             |            |           |      |      |      |      |           | [x]      |                         |
+| Zanni                              | [x]            | [x]   |             |            |           | [x]  |      |      | [x]  | [x]       |          |                         |
 
-Once you've edited these files, you can zip the directory and install inside Kodi.
+If you don't see these in your menus, don't be alarmed... it's just because you dont have them installed. They are supported, however ;)

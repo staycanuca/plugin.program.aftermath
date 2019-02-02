@@ -17,7 +17,7 @@
 #  http://www.gnu.org/copyleft/gpl.html                                        #
 ################################################################################
 
-import xbmc, xbmcaddon, xbmcgui, xbmcplugin, os, sys, xbmcvfs, HTMLParser, glob, zipfile, json
+import xbmc, xbmcaddon, xbmcgui, xbmcplugin, os, sys, xbmcvfs, HTMLParser, glob, json
 import shutil
 import errno
 import string
@@ -74,7 +74,13 @@ TOMORROW       = TODAY + timedelta(days=1)
 TWODAYS        = TODAY + timedelta(days=2)
 THREEDAYS      = TODAY + timedelta(days=3)
 ONEWEEK        = TODAY + timedelta(days=7)
-KODIV          = float(xbmc.getInfoLabel("System.BuildVersion")[:4])
+
+KODIV            = float(xbmc.getInfoLabel("System.BuildVersion")[:4])
+if KODIV > 17:
+	from resources.libs import zfile as zipfile
+else:
+	import zipfile
+
 EXCLUDES       = uservar.EXCLUDES
 CACHETEXT      = uservar.CACHETEXT
 CACHEAGE       = uservar.CACHEAGE if str(uservar.CACHEAGE).isdigit() else 30
@@ -95,11 +101,13 @@ COLOR1         = uservar.COLOR1
 COLOR2         = uservar.COLOR2
 INCLUDEVIDEO   = ADDON.getSetting('includevideo')
 INCLUDEALL     = ADDON.getSetting('includeall')
-INCLUDECHAPPAAI = ADDON.getSetting('includechappaai')
 INCLUDEPLACENTA  = ADDON.getSetting('includeplacenta')
-INCLUDEINCURSION = ADDON.getSetting('includeincursion')
+INCLUDEEXODUSREDUX  = ADDON.getSetting('includeexodusredux')
 INCLUDEGAIA   = ADDON.getSetting('includegaia')
+INCLUDESEREN   = ADDON.getSetting('includeseren')
 INCLUDEMAGICALITY = ADDON.getSetting('includemagicality')
+INCLUDE13CLOWNS = ADDON.getSetting('include13clowns')
+INCLUDEZANNI = ADDON.getSetting('includezanni')
 SHOWADULT      = ADDON.getSetting('adult')
 WIZDEBUGGING   = ADDON.getSetting('addon_debug')
 DEBUGLEVEL     = ADDON.getSetting('debuglevel')
@@ -120,7 +128,7 @@ THIRD3NAME     = ADDON.getSetting('wizard3name')
 THIRD3URL      = ADDON.getSetting('wizard3url')
 BACKUPLOCATION = ADDON.getSetting('path') if not ADDON.getSetting('path') == '' else 'special://home/'
 MYBUILDS       = os.path.join(BACKUPLOCATION, 'My_Builds', '')
-LOGFILES       = ['log', 'xbmc.old.log', 'kodi.log', 'kodi.old.log', 'spmc.log', 'spmc.old.log', 'tvmc.log', 'tvmc.old.log']
+LOGFILES       = ['log', 'xbmc.old.log', 'kodi.log', 'kodi.old.log', 'spmc.log', 'spmc.old.log', 'tvmc.log', 'tvmc.old.log', 'dmp']
 DEFAULTPLUGINS = ['metadata.album.universal', 'metadata.artists.universal', 'metadata.common.fanart.tv', 'metadata.common.imdb.com', 'metadata.common.musicbrainz.org', 'metadata.themoviedb.org', 'metadata.tvdb.com', 'service.xbmc.versioncheck']
 MAXWIZSIZE     = [100, 200, 300, 400, 500, 1000]
 MAXWIZLINES    = [100, 200, 300, 400, 500]
@@ -292,6 +300,15 @@ def checkBuild(name, ret):
 			elif ret == 'description':   return description
 			elif ret == 'info':          return info
 			elif ret == 'all':           return name, version, url, minor, gui, kodi, theme, icon, fanart, preview, adult, info, description
+	else: return False
+	
+def checkInfo(name):
+	if not workingURL(name) == True: return False
+	link = openURL(name).replace('\n','').replace('\r','').replace('\t','')
+	match = re.compile('.+?ame="(.+?)".+?xtracted="(.+?)".+?ipsize="(.+?)".+?kin="(.+?)".+?reated="(.+?)".+?rograms="(.+?)".+?ideo="(.+?)".+?usic="(.+?)".+?icture="(.+?)".+?epos="(.+?)".+?cripts="(.+?)"').findall(link)
+	if len(match) > 0:
+		for name, extracted, zipsize, skin, created, programs, video, music, picture, repos, scripts in match:
+			return name, extracted, zipsize, skin, created, programs, video, music, picture, repos, scripts
 	else: return False
 
 def checkTheme(name, theme, ret):
@@ -475,22 +492,26 @@ def getCacheSize():
 	PROFILEADDONDATA = os.path.join(PROFILE,'addon_data')
 	dbfiles   = [
 		## TODO: fix these
-		(os.path.join(ADDOND, 'plugin.video.uranus', 'cache.db')),
-		(os.path.join(ADDOND, 'plugin.video.uranus', 'meta.db')),
-		(os.path.join(DATABASE,  'DEATHScache.db')),
 		(os.path.join(ADDOND, 'plugin.video.placenta', 'cache.db')),
 		(os.path.join(ADDOND, 'plugin.video.placenta', 'cache.meta.5.db')),
 		(os.path.join(ADDOND, 'plugin.video.placenta', 'cache.providers.13.db')),
-		(os.path.join(ADDOND, 'plugin.video.incursion', 'cache.db')),
-		(os.path.join(ADDOND, 'plugin.video.incursion', 'cache.meta.5.db')),
-		(os.path.join(ADDOND, 'plugin.video.incursion', 'cache.providers.13.db')),
-		(os.path.join(ADDOND, 'plugin.video.numbersbynumbers', 'cache.db')),
-		(os.path.join(ADDOND, 'plugin.video.numbersbynumbers', 'meta.5.db')),
-		(os.path.join(ADDOND, 'plugin.video.numbersbynumbers', 'providers.13.db')),
+		(os.path.join(ADDOND, 'plugin.video.magicality', 'cache.db')),
+		(os.path.join(ADDOND, 'plugin.video.magicality', 'cache.meta.5.db')),
+		(os.path.join(ADDOND, 'plugin.video.magicality', 'cache.providers.13.db')),
+		(os.path.join(ADDOND, 'plugin.video.exodusredux', 'cache.db')),
+		(os.path.join(ADDOND, 'plugin.video.exodusredux', 'cache.meta.5.db')),
+		(os.path.join(ADDOND, 'plugin.video.exodusredux', 'cache.providers.13.db')),
 		(os.path.join(ADDOND, 'plugin.video.gaia', 'cache.db')),
 		(os.path.join(ADDOND, 'plugin.video.gaia', 'meta.db')),
-		(os.path.join(ADDOND, 'plugin.video.neptune', 'cache.db')),
-		(os.path.join(ADDOND, 'plugin.video.neptune', 'meta.5.db'))]
+		(os.path.join(ADDOND, 'plugin.video.13clowns', 'cache.db')),
+		(os.path.join(ADDOND, 'plugin.video.13clowns', 'cache.meta.5.db')),
+		(os.path.join(ADDOND, 'plugin.video.13clowns', 'cache.providers.13.db')),
+		(os.path.join(ADDOND, 'plugin.video.zanni', 'cache.db')),
+		(os.path.join(ADDOND, 'plugin.video.zanni', 'cache.meta.5.db')),
+		(os.path.join(ADDOND, 'plugin.video.zanni', 'cache.providers.13.db')),
+		(os.path.join(ADDOND, 'plugin.video.seren', 'cache.db')),
+		(os.path.join(ADDOND, 'plugin.video.seren', 'torrentScrape.db')),
+		(os.path.join(ADDOND, 'script.module.simplecache', 'simplecache.db'))]
 	cachelist = [
 		(ADDOND),
 		(os.path.join(HOME,'cache')),
@@ -498,10 +519,30 @@ def getCacheSize():
 		(os.path.join('/private/var/mobile/Library/Caches/AppleTV/Video/', 'Other')),
 		(os.path.join('/private/var/mobile/Library/Caches/AppleTV/Video/', 'LocalAndRental')),
 		(os.path.join(ADDOND,'script.module.simple.downloader')),
-		(os.path.join(ADDOND,'plugin.video.itv','Images'))]
+		(os.path.join(ADDOND,'plugin.video.itv','Images')),
+		(os.path.join(ADDOND, 'script.extendedinfo', 'images')),
+		(os.path.join(ADDOND, 'script.extendedinfo', 'TheMovieDB')),
+		(os.path.join(ADDOND, 'script.extendedinfo', 'YouTube')),
+		(os.path.join(ADDOND, 'plugin.program.iagl', 'temp_iagl')),
+		(os.path.join(ADDOND, 'plugin.program.iagl', 'list_cache')),
+		(os.path.join(ADDOND, 'plugin.program.iarl', 'temp_iarl')),
+		(os.path.join(ADDOND, 'plugin.program.iarl', 'list_cache')),
+		(os.path.join(ADDOND, 'plugin.program.autocompletion', 'Google')),
+		(os.path.join(ADDOND, 'plugin.program.autocompletion', 'Bing')),
+		(os.path.join(ADDOND, 'plugin.video.openmeta', '.storage'))]
 	if not PROFILEADDONDATA == ADDOND:
 		cachelist.append(os.path.join(PROFILEADDONDATA,'script.module.simple.downloader'))
 		cachelist.append(os.path.join(PROFILEADDONDATA,'plugin.video.itv','Images'))
+		cachelist.append(os.path.join(ADDOND, 'script.extendedinfo', 'images'))
+		cachelist.append(os.path.join(ADDOND, 'script.extendedinfo', 'TheMovieDB')),
+		cachelist.append(os.path.join(ADDOND, 'script.extendedinfo', 'YouTube')),
+		cachelist.append(os.path.join(ADDOND, 'plugin.program.iagl', 'temp_iagl')),
+		cachelist.append(os.path.join(ADDOND, 'plugin.program.iagl', 'list_cache')),
+		cachelist.append(os.path.join(ADDOND, 'plugin.program.iarl', 'temp_iarl')),
+		cachelist.append(os.path.join(ADDOND, 'plugin.program.iarl', 'list_cache')),
+		cachelist.append(os.path.join(ADDOND, 'plugin.program.autocompletion', 'Google')),
+		cachelist.append(os.path.join(ADDOND, 'plugin.program.autocompletion', 'Bing')),
+		cachelist.append(os.path.join(ADDOND, 'plugin.video.openmeta', '.storage')),
 		cachelist.append(PROFILEADDONDATA)
 
 	totalsize = 0
@@ -521,28 +562,32 @@ def getCacheSize():
 		if INCLUDEALL == 'true': files = dbfiles
 		else:
 			## TODO: Double check these and add more
-			if INCLUDEURANUS == 'true':
-				files.append(os.path.join(ADDOND, 'plugin.video.uranus', 'cache.db'))
-				files.append(os.path.join(ADDOND, 'plugin.video.uranus', 'meta.db'))
-			if INCLUDEDEATH == 'true': files.append(os.path.join(DATABASE, 'DEATHScache.db'))
+			if INCLUDEEXODUSREDUX == 'true':
+				files.append(os.path.join(ADDOND, 'plugin.video.exodusredux', 'cache.db'))
+				files.append(os.path.join(ADDOND, 'plugin.video.exodusredux', 'meta.5.db'))
+				files.append(os.path.join(ADDOND, 'plugin.video.exodusredux', 'providers.13.db'))
 			if INCLUDEPLACENTA == 'true':
 				files.append(os.path.join(ADDOND, 'plugin.video.placenta', 'cache.db'))
 				files.append(os.path.join(ADDOND, 'plugin.video.placenta', 'meta.5.db'))
 				files.append(os.path.join(ADDOND, 'plugin.video.placenta', 'providers.13.db'))
-			if INCLUDEINCURSION == 'true':
-				files.append(os.path.join(ADDOND, 'plugin.video.incursion', 'cache.db'))
-				files.append(os.path.join(ADDOND, 'plugin.video.incursion', 'meta.5.db'))
-				files.append(os.path.join(ADDOND, 'plugin.video.incursion', 'providers.13.db'))
-			if INCLUDENUMBERS == 'true':
-				files.append(os.path.join(ADDOND, 'plugin.video.numbersbynumbers', 'cache.db'))
-				files.append(os.path.join(ADDOND, 'plugin.video.numbersbynumbers', 'meta.5.db'))
-				files.append(os.path.join(ADDOND, 'plugin.video.numbersbynumbers', 'providers.13.db'))
+			if INCLUDEMAGICALITY == 'true':
+				files.append(os.path.join(ADDOND, 'plugin.video.magicality', 'cache.db'))
+				files.append(os.path.join(ADDOND, 'plugin.video.magicality', 'meta.5.db'))
+				files.append(os.path.join(ADDOND, 'plugin.video.magicality', 'providers.13.db'))
 			if INCLUDEGAIA == 'true':
 				files.append(os.path.join(ADDOND, 'plugin.video.gaia', 'cache.db'))
 				files.append(os.path.join(ADDOND, 'plugin.video.gaia', 'meta.db'))
-			if INCLUDENEPTUNE == 'true':
-				files.append(os.path.join(ADDOND, 'plugin.video.neptune', 'cache.db'))
-				files.append(os.path.join(ADDOND, 'plugin.video.neptune', 'meta.5.db'))
+			if INCLUDESEREN == 'true':
+				files.append(os.path.join(ADDOND, 'plugin.video.seren', 'cache.db'))
+				files.append(os.path.join(ADDOND, 'plugin.video.seren', 'torrentScrape.db'))
+			if INCLUDE13CLOWNS == 'true': 
+				files.append(os.path.join(ADDOND, 'plugin.video.13clowns', 'cache.db'))
+				files.append(os.path.join(ADDOND, 'plugin.video.13clowns', 'meta.5.db'))
+				files.append(os.path.join(ADDOND, 'plugin.video.13clowns', 'providers.13.db'))
+			if INCLUDEZANNI == 'true': 
+				files.append(os.path.join(ADDOND, 'plugin.video.zanni', 'cache.db'))
+				files.append(os.path.join(ADDOND, 'plugin.video.zanni', 'meta.5.db'))
+				files.append(os.path.join(ADDOND, 'plugin.video.zanni', 'providers.13.db'))
 		if len(files) > 0:
 			for item in files:
 				if not os.path.exists(item): continue
@@ -731,7 +776,7 @@ def createTemp(plugin):
 	log("%s: wrote addon.xml" % plugin)
 
 def fixmetas():
-	idlist = ['plugin.video.chappaai', 'plugin.video.meta', 'script.renegadesmeta']
+	idlist = []
 	#temp   = os.path.join(PLUGIN, 'resources', 'tempaddon.xml')
 	#f      = open(temp, 'r'); r = f.read(); f.close()
 	for item in idlist:
@@ -809,7 +854,7 @@ def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
 def generateQR(url, filename):
 	if not os.path.exists(QRCODES): os.makedirs(QRCODES)
 	imagefile = os.path.join(QRCODES,'%s.png' % filename)
- 	qrIMG     = pyqrcode.create(url)
+	qrIMG     = pyqrcode.create(url)
 	qrIMG.png(imagefile, scale=10)
 	return imagefile
 
@@ -1227,7 +1272,10 @@ def asciiCheck(use=None, over=False):
 			DP.update(prog2,"[COLOR %s]Checking for non ASCII files" % COLOR2,'[COLOR %s]%s[/COLOR]' % (COLOR1, d), 'Please Wait[/COLOR]')
 			try:
 				file.encode('ascii')
+			except UnicodeEncodeError:
+				wiz.log("[ASCII Check] Illegal character found in file: {0}".format(item.filename))
 			except UnicodeDecodeError:
+				wiz.log("[ASCII Check] Illegal character found in file: {0}".format(item.filename))
 				badfile = os.path.join(base, file)
 				if yes:
 					try:
@@ -1351,25 +1399,30 @@ def convertAdvanced():
 ###BACK UP/RESTORE #######
 ##########################
 def backUpOptions(type, name=""):
-	exclude_dirs  = [ADDON_ID, 'cache', 'system', 'Thumbnails', 'peripheral_data', 'temp', 'My_Builds', 'keymaps']
+	exclude_dirs  = [ADDON_ID, 'cache', 'system', 'Thumbnails', 'peripheral_data', 'temp', 'My_Builds', 'keymaps', 'cdm']
 	exclude_files = ['Textures13.db', '.DS_Store', 'advancedsettings.xml', 'Thumbs.db', '.gitignore']
 	## TODO: fix these
-	bad_files     = [(os.path.join(ADDOND, 'plugin.video.uranus', 'cache.db')),
-					(os.path.join(ADDOND, 'plugin.video.uranus', 'meta.db')),
-					(os.path.join(DATABASE,  'DEATHScache.db')),
+	bad_files     = [
 					(os.path.join(ADDOND, 'plugin.video.placenta', 'cache.db')),
 					(os.path.join(ADDOND, 'plugin.video.placenta', 'cache.meta.5.db')),
 					(os.path.join(ADDOND, 'plugin.video.placenta', 'cache.providers.13.db')),
-					(os.path.join(ADDOND, 'plugin.video.incursion', 'cache.db')),
-					(os.path.join(ADDOND, 'plugin.video.incursion', 'cache.meta.5.db')),
-					(os.path.join(ADDOND, 'plugin.video.incursion', 'cache.providers.13.db')),
-					(os.path.join(ADDOND, 'plugin.video.numbersbynumbers', 'cache.db')),
-					(os.path.join(ADDOND, 'plugin.video.numbersbynumbers', 'meta.5.db')),
-					(os.path.join(ADDOND, 'plugin.video.numbersbynumbers', 'providers.13.db')),
+					(os.path.join(ADDOND, 'plugin.video.magicality', 'cache.db')),
+					(os.path.join(ADDOND, 'plugin.video.magicality', 'cache.meta.5.db')),
+					(os.path.join(ADDOND, 'plugin.video.magicality', 'cache.providers.13.db')),
+					(os.path.join(ADDOND, 'plugin.video.exodusredux', 'cache.db')),
+					(os.path.join(ADDOND, 'plugin.video.exodusredux', 'cache.meta.5.db')),
+					(os.path.join(ADDOND, 'plugin.video.exodusredux', 'cache.providers.13.db')),
+					(os.path.join(ADDOND, 'plugin.video.13clowns', 'cache.db')),
+					(os.path.join(ADDOND, 'plugin.video.13clowns', 'cache.meta.5.db')),
+					(os.path.join(ADDOND, 'plugin.video.13clowns', 'cache.providers.13.db')),
+					(os.path.join(ADDOND, 'plugin.video.zanni', 'cache.db')),
+					(os.path.join(ADDOND, 'plugin.video.zanni', 'cache.meta.5.db')),
+					(os.path.join(ADDOND, 'plugin.video.zanni', 'cache.providers.13.db')),
 					(os.path.join(ADDOND, 'plugin.video.gaia', 'cache.db')),
 					(os.path.join(ADDOND, 'plugin.video.gaia', 'meta.db')),
-					(os.path.join(ADDOND, 'plugin.video.neptune', 'cache.db')),
-					(os.path.join(ADDOND, 'plugin.video.neptune', 'meta.5.db'))]
+					(os.path.join(ADDOND, 'plugin.video.seren', 'cache.db')),
+					(os.path.join(ADDOND, 'plugin.video.seren', 'torrentScrape.db')),
+					(os.path.join(ADDOND, 'script.module.simplecache', 'simplecache.db'))]
 
 	backup   = xbmc.translatePath(BACKUPLOCATION)
 	mybuilds = xbmc.translatePath(MYBUILDS)
@@ -1548,6 +1601,7 @@ def backUpOptions(type, name=""):
 						if file in LOGFILES: log("[Back Up] Type = '%s': Ignore %s" % (type, file), xbmc.LOGNOTICE); continue
 						elif os.path.join(base, file) in bad_files: log("[Back Up] Type = '%s': Ignore %s" % (type, file), xbmc.LOGNOTICE); continue
 						elif os.path.join('addons', 'packages') in fn: log("[Back Up] Type = '%s': Ignore %s" % (type, file), xbmc.LOGNOTICE); continue
+						elif os.path.join(ADDONS, 'inputstream.adaptive') in fn: log("[Back Up] Type = '%s': Ignore %s" % (type, file), xbmc.LOGNOTICE); continue
 						elif file.endswith('.csv'): log("[Back Up] Type = '%s': Ignore %s" % (type, file), xbmc.LOGNOTICE); continue
 						elif file.endswith('.pyo'): continue
 						elif file.endswith('.db') and 'Database' in base:
@@ -2267,14 +2321,23 @@ def clearCache(over=None):
 		(os.path.join(ADDOND, 'plugin.video.placenta', 'cache.db')),
 		(os.path.join(ADDOND, 'plugin.video.placenta', 'cache.meta.5.db')),
 		(os.path.join(ADDOND, 'plugin.video.placenta', 'cache.providers.13.db')),
-		(os.path.join(ADDOND, 'plugin.video.incursion', 'cache.db')),
-		(os.path.join(ADDOND, 'plugin.video.incursion', 'cache.meta.5.db')),
-		(os.path.join(ADDOND, 'plugin.video.incursion', 'cache.providers.13.db')),
 		(os.path.join(ADDOND, 'plugin.video.gaia', 'cache.db')),
 		(os.path.join(ADDOND, 'plugin.video.gaia', 'meta.db')),
+		(os.path.join(ADDOND, 'plugin.video.exodusredux', 'cache.db')),
+		(os.path.join(ADDOND, 'plugin.video.exoudsredux', 'meta.5.db')),
+		(os.path.join(ADDOND, 'plugin.video.exodusredux', 'cache.providers.13.db')),
 		(os.path.join(ADDOND, 'plugin.video.magicality', 'cache.db')),
 		(os.path.join(ADDOND, 'plugin.video.magicality', 'meta.5.db')),
-		(os.path.join(ADDOND, 'plugin.video.magicality', 'cache.providers.13.db'))]
+		(os.path.join(ADDOND, 'plugin.video.magicality', 'cache.providers.13.db')),
+		(os.path.join(ADDOND, 'plugin.video.13clowns', 'cache.db')),
+		(os.path.join(ADDOND, 'plugin.video.13clowns', 'meta.5.db')),
+		(os.path.join(ADDOND, 'plugin.video.13clowns', 'cache.providers.13.db')),
+		(os.path.join(ADDOND, 'plugin.video.zanni', 'cache.db')),
+		(os.path.join(ADDOND, 'plugin.video.zanni', 'meta.5.db')),
+		(os.path.join(ADDOND, 'plugin.video.zanni', 'cache.providers.13.db')),
+		(os.path.join(ADDOND, 'plugin.video.seren', 'cache.db')),
+		(os.path.join(ADDOND, 'plugin.video.seren', 'torrentScrape.db')),
+		(os.path.join(ADDOND, 'script.module.simplecache', 'simplecache.db'))]
 
 	cachelist = [
 		(PROFILEADDONDATA),
@@ -2286,7 +2349,17 @@ def clearCache(over=None):
 		(os.path.join(ADDOND,'script.module.simple.downloader')),
 		(os.path.join(ADDOND,'plugin.video.itv','Images')),
 		(os.path.join(PROFILEADDONDATA,'script.module.simple.downloader')),
-		(os.path.join(PROFILEADDONDATA,'plugin.video.itv','Images'))]
+		(os.path.join(PROFILEADDONDATA,'plugin.video.itv','Images')),
+		(os.path.join(ADDOND, 'script.extendedinfo', 'images')),
+		(os.path.join(ADDOND, 'script.extendedinfo', 'TheMovieDB')),
+		(os.path.join(ADDOND, 'script.extendedinfo', 'YouTube')),
+		(os.path.join(ADDOND, 'plugin.program.iagl', 'temp_iagl')),
+		(os.path.join(ADDOND, 'plugin.program.iagl', 'list_cache')),
+		(os.path.join(ADDOND, 'plugin.program.iarl', 'temp_iarl')),
+		(os.path.join(ADDOND, 'plugin.program.iarl', 'list_cache')),
+		(os.path.join(ADDOND, 'plugin.program.autocompletion', 'Google')),
+		(os.path.join(ADDOND, 'plugin.program.autocompletion', 'Bing')),
+		(os.path.join(ADDOND, 'plugin.video.openmeta', '.storage'))]
 
 	delfiles = 0
 	excludes = ['meta_cache', 'archive_cache']
@@ -2334,10 +2407,10 @@ def clearCache(over=None):
 				files.append(os.path.join(ADDOND, 'plugin.video.placenta', 'cache.db'))
 				files.append(os.path.join(ADDOND, 'plugin.video.placenta', 'meta.5.db'))
 				files.append(os.path.join(ADDOND, 'plugin.video.placenta', 'providers.13.db'))
-			if INCLUDEINCURSION == 'true':
-				files.append(os.path.join(ADDOND, 'plugin.video.incursion', 'cache.db'))
-				files.append(os.path.join(ADDOND, 'plugin.video.incursion', 'meta.5.db'))
-				files.append(os.path.join(ADDOND, 'plugin.video.incursion', 'providers.13.db'))
+			if INCLUDEEXODUSREDUX == 'true':
+				files.append(os.path.join(ADDOND, 'plugin.video.exodusredux', 'cache.db'))
+				files.append(os.path.join(ADDOND, 'plugin.video.exodusredux', 'meta.5.db'))
+				files.append(os.path.join(ADDOND, 'plugin.video.exodusredux', 'providers.13.db'))
 			if INCLUDEGAIA == 'true':
 				files.append(os.path.join(ADDOND, 'plugin.video.gaia', 'cache.db'))
 				files.append(os.path.join(ADDOND, 'plugin.video.gaia', 'meta.db'))
@@ -2345,6 +2418,17 @@ def clearCache(over=None):
 				files.append(os.path.join(ADDOND, 'plugin.video.magicality', 'cache.db'))
 				files.append(os.path.join(ADDOND, 'plugin.video.magicality', 'meta.5.db'))
 				files.append(os.path.join(ADDOND, 'plugin.video.magicality', 'providers.13.db'))
+			if INCLUDESEREN == 'true':
+				files.append(os.path.join(ADDOND, 'plugin.video.seren', 'cache.db'))
+				files.append(os.path.join(ADDOND, 'plugin.video.seren', 'torrentScrape.db'))
+			if INCLUDE13CLOWNS == 'true':
+				files.append(os.path.join(ADDOND, 'plugin.video.13clowns', 'cache.db'))
+				files.append(os.path.join(ADDOND, 'plugin.video.13clowns', 'meta.5.db'))
+				files.append(os.path.join(ADDOND, 'plugin.video.13clowns', 'providers.13.db'))
+			if INCLUDEZANNI == 'true':
+				files.append(os.path.join(ADDOND, 'plugin.video.zanni', 'cache.db'))
+				files.append(os.path.join(ADDOND, 'plugin.video.zanni', 'meta.5.db'))
+				files.append(os.path.join(ADDOND, 'plugin.video.zanni', 'providers.13.db'))
 		if len(files) > 0:
 			for item in files:
 				if os.path.exists(item):
@@ -2599,6 +2683,41 @@ def data_type(str):
 	datatype = type(str).__name__
 	return datatype
 
+def net_info():
+	import re
+	import json
+	from urllib2 import urlopen
+	infoLabel = ['Network.IPAddress',
+				 'Network.MacAddress',]
+	data      = []; x = 0
+	for info in infoLabel:
+		temp = getInfo(info)
+		y = 0
+		while temp == "Busy" and y < 10:
+			temp = getInfo(info); y += 1; log("%s sleep %s" % (info, str(y))); xbmc.sleep(200)
+		data.append(temp)
+		x += 1
+	try:
+		url = 'http://extreme-ip-lookup.com/json/'
+		req = urllib2.Request(url)
+		req.add_header('User-Agent', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')
+		response = urllib2.urlopen(req)
+		geo = json.load(response)
+	except:
+		url = 'http://ip-api.com/json'
+		req = urllib2.Request(url)
+		req.add_header('User-Agent', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')
+		response = urllib2.urlopen(req)
+		geo = json.load(response)
+	mac = data[1]
+	inter_ip = data[0]
+	ip=geo['query']
+	isp=geo['org']
+	city = geo['city']
+	country=geo['country']
+	state=geo['region']
+	return mac,inter_ip,ip,city,state,country,isp
+
 ##########################
 ### PURGE DATABASE #######
 ##########################
@@ -2674,114 +2793,114 @@ def oldThumbs():
 	else: LogNotify("[COLOR %s]%s[/COLOR]" % (COLOR1, ADDONTITLE), '[COLOR %s]Clear Thumbs: None Found![/COLOR]' % COLOR2)
 
 def parseDOM(html, name=u"", attrs={}, ret=False):
-    # Copyright (C) 2010-2011 Tobias Ussing And Henrik Mosgaard Jensen
+	# Copyright (C) 2010-2011 Tobias Ussing And Henrik Mosgaard Jensen
 
-    if isinstance(html, str):
-        try:
-            html = [html.decode("utf-8")]
-        except:
-            html = [html]
-    elif isinstance(html, unicode):
-        html = [html]
-    elif not isinstance(html, list):
-        return u""
+	if isinstance(html, str):
+		try:
+			html = [html.decode("utf-8")]
+		except:
+			html = [html]
+	elif isinstance(html, unicode):
+		html = [html]
+	elif not isinstance(html, list):
+		return u""
 
-    if not name.strip():
-        return u""
+	if not name.strip():
+		return u""
 
-    ret_lst = []
-    for item in html:
-        temp_item = re.compile('(<[^>]*?\n[^>]*?>)').findall(item)
-        for match in temp_item:
-            item = item.replace(match, match.replace("\n", " "))
+	ret_lst = []
+	for item in html:
+		temp_item = re.compile('(<[^>]*?\n[^>]*?>)').findall(item)
+		for match in temp_item:
+			item = item.replace(match, match.replace("\n", " "))
 
-        lst = []
-        for key in attrs:
-            lst2 = re.compile('(<' + name + '[^>]*?(?:' + key + '=[\'"]' + attrs[key] + '[\'"].*?>))', re.M | re.S).findall(item)
-            if len(lst2) == 0 and attrs[key].find(" ") == -1:
-                lst2 = re.compile('(<' + name + '[^>]*?(?:' + key + '=' + attrs[key] + '.*?>))', re.M | re.S).findall(item)
+		lst = []
+		for key in attrs:
+			lst2 = re.compile('(<' + name + '[^>]*?(?:' + key + '=[\'"]' + attrs[key] + '[\'"].*?>))', re.M | re.S).findall(item)
+			if len(lst2) == 0 and attrs[key].find(" ") == -1:
+				lst2 = re.compile('(<' + name + '[^>]*?(?:' + key + '=' + attrs[key] + '.*?>))', re.M | re.S).findall(item)
 
-            if len(lst) == 0:
-                lst = lst2
-                lst2 = []
-            else:
-                test = range(len(lst))
-                test.reverse()
-                for i in test:
-                    if not lst[i] in lst2:
-                        del(lst[i])
+			if len(lst) == 0:
+				lst = lst2
+				lst2 = []
+			else:
+				test = range(len(lst))
+				test.reverse()
+				for i in test:
+					if not lst[i] in lst2:
+						del(lst[i])
 
-        if len(lst) == 0 and attrs == {}:
-            lst = re.compile('(<' + name + '>)', re.M | re.S).findall(item)
-            if len(lst) == 0:
-                lst = re.compile('(<' + name + ' .*?>)', re.M | re.S).findall(item)
+		if len(lst) == 0 and attrs == {}:
+			lst = re.compile('(<' + name + '>)', re.M | re.S).findall(item)
+			if len(lst) == 0:
+				lst = re.compile('(<' + name + ' .*?>)', re.M | re.S).findall(item)
 
-        if isinstance(ret, str):
-            lst2 = []
-            for match in lst:
-                attr_lst = re.compile('<' + name + '.*?' + ret + '=([\'"].[^>]*?[\'"])>', re.M | re.S).findall(match)
-                if len(attr_lst) == 0:
-                    attr_lst = re.compile('<' + name + '.*?' + ret + '=(.[^>]*?)>', re.M | re.S).findall(match)
-                for tmp in attr_lst:
-                    cont_char = tmp[0]
-                    if cont_char in "'\"":
-                        if tmp.find('=' + cont_char, tmp.find(cont_char, 1)) > -1:
-                            tmp = tmp[:tmp.find('=' + cont_char, tmp.find(cont_char, 1))]
+		if isinstance(ret, str):
+			lst2 = []
+			for match in lst:
+				attr_lst = re.compile('<' + name + '.*?' + ret + '=([\'"].[^>]*?[\'"])>', re.M | re.S).findall(match)
+				if len(attr_lst) == 0:
+					attr_lst = re.compile('<' + name + '.*?' + ret + '=(.[^>]*?)>', re.M | re.S).findall(match)
+				for tmp in attr_lst:
+					cont_char = tmp[0]
+					if cont_char in "'\"":
+						if tmp.find('=' + cont_char, tmp.find(cont_char, 1)) > -1:
+							tmp = tmp[:tmp.find('=' + cont_char, tmp.find(cont_char, 1))]
 
-                        if tmp.rfind(cont_char, 1) > -1:
-                            tmp = tmp[1:tmp.rfind(cont_char)]
-                    else:
-                        if tmp.find(" ") > 0:
-                            tmp = tmp[:tmp.find(" ")]
-                        elif tmp.find("/") > 0:
-                            tmp = tmp[:tmp.find("/")]
-                        elif tmp.find(">") > 0:
-                            tmp = tmp[:tmp.find(">")]
+						if tmp.rfind(cont_char, 1) > -1:
+							tmp = tmp[1:tmp.rfind(cont_char)]
+					else:
+						if tmp.find(" ") > 0:
+							tmp = tmp[:tmp.find(" ")]
+						elif tmp.find("/") > 0:
+							tmp = tmp[:tmp.find("/")]
+						elif tmp.find(">") > 0:
+							tmp = tmp[:tmp.find(">")]
 
-                    lst2.append(tmp.strip())
-            lst = lst2
-        else:
-            lst2 = []
-            for match in lst:
-                endstr = u"</" + name
+					lst2.append(tmp.strip())
+			lst = lst2
+		else:
+			lst2 = []
+			for match in lst:
+				endstr = u"</" + name
 
-                start = item.find(match)
-                end = item.find(endstr, start)
-                pos = item.find("<" + name, start + 1 )
+				start = item.find(match)
+				end = item.find(endstr, start)
+				pos = item.find("<" + name, start + 1 )
 
-                while pos < end and pos != -1:
-                    tend = item.find(endstr, end + len(endstr))
-                    if tend != -1:
-                        end = tend
-                    pos = item.find("<" + name, pos + 1)
+				while pos < end and pos != -1:
+					tend = item.find(endstr, end + len(endstr))
+					if tend != -1:
+						end = tend
+					pos = item.find("<" + name, pos + 1)
 
-                if start == -1 and end == -1:
-                    temp = u""
-                elif start > -1 and end > -1:
-                    temp = item[start + len(match):end]
-                elif end > -1:
-                    temp = item[:end]
-                elif start > -1:
-                    temp = item[start + len(match):]
+				if start == -1 and end == -1:
+					temp = u""
+				elif start > -1 and end > -1:
+					temp = item[start + len(match):end]
+				elif end > -1:
+					temp = item[:end]
+				elif start > -1:
+					temp = item[start + len(match):]
 
-                if ret:
-                    endstr = item[end:item.find(">", item.find(endstr)) + 1]
-                    temp = match + temp + endstr
+				if ret:
+					endstr = item[end:item.find(">", item.find(endstr)) + 1]
+					temp = match + temp + endstr
 
-                item = item[item.find(temp, item.find(match)) + len(temp):]
-                lst2.append(temp)
-            lst = lst2
-        ret_lst += lst
+				item = item[item.find(temp, item.find(match)) + len(temp):]
+				lst2.append(temp)
+			lst = lst2
+		ret_lst += lst
 
-    return ret_lst
+	return ret_lst
 
 
 def replaceHTMLCodes(txt):
-    txt = re.sub("(&#[0-9]+)([^;^0-9]+)", "\\1;\\2", txt)
-    txt = HTMLParser.HTMLParser().unescape(txt)
-    txt = txt.replace("&quot;", "\"")
-    txt = txt.replace("&amp;", "&")
-    return txt
+	txt = re.sub("(&#[0-9]+)([^;^0-9]+)", "\\1;\\2", txt)
+	txt = HTMLParser.HTMLParser().unescape(txt)
+	txt = txt.replace("&quot;", "\"")
+	txt = txt.replace("&amp;", "&")
+	return txt
 
 import os
 from shutil import *
