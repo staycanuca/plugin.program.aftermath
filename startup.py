@@ -267,8 +267,6 @@ if KODIADDONS in ADDONPATH:
 		pass
 	wiz.forceUpdate(True)
 
-if not os.path.exists(ADVANCED): writeAdvanced()
-
 try:
 	mybuilds = xbmc.translatePath(MYBUILDS)
 	if not os.path.exists(mybuilds): xbmcvfs.mkdirs(mybuilds)

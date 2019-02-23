@@ -523,10 +523,6 @@ def getCacheSize():
 		(os.path.join(ADDOND, 'script.extendedinfo', 'images')),
 		(os.path.join(ADDOND, 'script.extendedinfo', 'TheMovieDB')),
 		(os.path.join(ADDOND, 'script.extendedinfo', 'YouTube')),
-		(os.path.join(ADDOND, 'plugin.program.iagl', 'temp_iagl')),
-		(os.path.join(ADDOND, 'plugin.program.iagl', 'list_cache')),
-		(os.path.join(ADDOND, 'plugin.program.iarl', 'temp_iarl')),
-		(os.path.join(ADDOND, 'plugin.program.iarl', 'list_cache')),
 		(os.path.join(ADDOND, 'plugin.program.autocompletion', 'Google')),
 		(os.path.join(ADDOND, 'plugin.program.autocompletion', 'Bing')),
 		(os.path.join(ADDOND, 'plugin.video.openmeta', '.storage'))]
@@ -536,10 +532,6 @@ def getCacheSize():
 		cachelist.append(os.path.join(ADDOND, 'script.extendedinfo', 'images'))
 		cachelist.append(os.path.join(ADDOND, 'script.extendedinfo', 'TheMovieDB')),
 		cachelist.append(os.path.join(ADDOND, 'script.extendedinfo', 'YouTube')),
-		cachelist.append(os.path.join(ADDOND, 'plugin.program.iagl', 'temp_iagl')),
-		cachelist.append(os.path.join(ADDOND, 'plugin.program.iagl', 'list_cache')),
-		cachelist.append(os.path.join(ADDOND, 'plugin.program.iarl', 'temp_iarl')),
-		cachelist.append(os.path.join(ADDOND, 'plugin.program.iarl', 'list_cache')),
 		cachelist.append(os.path.join(ADDOND, 'plugin.program.autocompletion', 'Google')),
 		cachelist.append(os.path.join(ADDOND, 'plugin.program.autocompletion', 'Bing')),
 		cachelist.append(os.path.join(ADDOND, 'plugin.video.openmeta', '.storage')),
@@ -2353,10 +2345,6 @@ def clearCache(over=None):
 		(os.path.join(ADDOND, 'script.extendedinfo', 'images')),
 		(os.path.join(ADDOND, 'script.extendedinfo', 'TheMovieDB')),
 		(os.path.join(ADDOND, 'script.extendedinfo', 'YouTube')),
-		(os.path.join(ADDOND, 'plugin.program.iagl', 'temp_iagl')),
-		(os.path.join(ADDOND, 'plugin.program.iagl', 'list_cache')),
-		(os.path.join(ADDOND, 'plugin.program.iarl', 'temp_iarl')),
-		(os.path.join(ADDOND, 'plugin.program.iarl', 'list_cache')),
 		(os.path.join(ADDOND, 'plugin.program.autocompletion', 'Google')),
 		(os.path.join(ADDOND, 'plugin.program.autocompletion', 'Bing')),
 		(os.path.join(ADDOND, 'plugin.video.openmeta', '.storage'))]

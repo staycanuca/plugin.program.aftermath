@@ -14,7 +14,7 @@ Currently, this version of the wizard supports:
 | Exodus Redux                       | [x]            | [x]   |             |            |           | [x]  |      |      | [x]  | [x]       |          |                         |
 | ExtendedInfo Script                | [x]            |       |             |            |           | [x]  |      |      |      |           |          |                         |
 | Gaia                               | [x]            | [x]   | [x]         | [x]        |           | [x]  |      |      | [x]  | [x]       |          |                         |
-| IAGL/IARL                          | [x]            |       |             |            |           |      |      |      |      |           |          | [x]                     |
+| IARL                               |                |       |             |            |           |      |      |      |      |           |          | [x]                     |
 | Magicality                         | [x]            | [x]   |             |            |           | [x]  |      |      | [x]  | [x]       |          |                         |
 | Netflix                            |                |       |             |            |           |      |      |      |      |           |          | [x]                     |
 | OpenInfo                           | [x]            |       |             |            |           | [x]  |      |      |      |           |          |                         |
